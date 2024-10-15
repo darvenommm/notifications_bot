@@ -1,1 +1,1 @@
-from .main_settings import main_settings, BotType
+from .main_settings import BotType, main_settings

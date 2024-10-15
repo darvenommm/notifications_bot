@@ -1,5 +1,5 @@
-from sys import path
 from pathlib import Path
+from sys import path
 
 
 current_dir = Path(__file__).resolve().parent

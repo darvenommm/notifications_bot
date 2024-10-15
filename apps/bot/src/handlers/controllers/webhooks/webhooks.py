@@ -1,10 +1,10 @@
-from aiogram.types import Update
-from fastapi import Request, HTTPException
 from http import HTTPMethod, HTTPStatus
 
+from aiogram.types import Update
+from bot.src.core.bots import BotSettings
 from bot.src.handlers.controllers import Controller
-from bot.src.core.bot import BotSettings
 from bot.src.settings.envs.webhooks import webhooks_settings as settings
+from fastapi import HTTPException, Request
 
 
 class WebhooksControllers(Controller):

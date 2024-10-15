@@ -1,12 +1,12 @@
-import uvicorn
 from contextlib import asynccontextmanager
+from typing import AsyncContextManager, AsyncGenerator, Callable, Iterable
+
+import uvicorn
+from bot.src.core.bots import BaseBot, BotSettings
+from bot.src.handlers.controllers import Controller
+from bot.src.settings.envs.webhooks import webhooks_settings
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
-from typing import AsyncGenerator, Callable, Iterable
-
-from bot.src.core.bot import BaseBot, BotSettings
-from bot.src.settings.envs.webhooks import webhooks_settings
-from bot.src.handlers.controllers import Controller
 
 
 class WebhooksBot(BaseBot):
@@ -38,9 +38,9 @@ class WebhooksBot(BaseBot):
 
         return server
 
-    def get_lifespan(self) -> Callable[[], AsyncGenerator[None, None]]:
+    def get_lifespan(self) -> Callable[[FastAPI], AsyncContextManager[None]]:
         @asynccontextmanager
-        async def lifespan(_) -> AsyncGenerator[None, None]:
+        async def lifespan(_: FastAPI) -> AsyncGenerator[None, None]:
             bot = self._bot_settings.bot
 
             await bot.set_webhook(

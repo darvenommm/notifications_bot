@@ -1,5 +1,6 @@
 import asyncio
-from bot.src.core.bot import BaseBot
+
+from bot.src.core.bots import BaseBot
 
 
 class PollingBot(BaseBot):

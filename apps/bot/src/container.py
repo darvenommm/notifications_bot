@@ -1,10 +1,9 @@
 from dependency_injector import containers, providers
-from typing import Self
 
-from .settings.envs.main import main_settings, BotType
 from .app import App
-from .core.bot import BaseBot, BotSettings
+from .core.bots import BaseBot, BotSettings
 from .handlers.controllers.webhooks import WebhooksControllers
+from .settings.envs.main import BotType, main_settings
 
 
 class Container(containers.DeclarativeContainer):
@@ -43,7 +42,7 @@ class ContainerFactory:
     def __setup_bot(self) -> None:
         match main_settings.bot_type:
             case BotType.POLLING:
-                from .core.bot.polling import PollingBot
+                from .core.bots.polling import PollingBot
 
                 self.__container.bot.override(
                     providers.Singleton(
@@ -53,7 +52,7 @@ class ContainerFactory:
                 )
 
             case BotType.WEBHOOKS:
-                from .core.bot.webhooks import WebhooksBot
+                from .core.bots.webhooks import WebhooksBot
 
                 self.__container.bot.override(
                     providers.Singleton(

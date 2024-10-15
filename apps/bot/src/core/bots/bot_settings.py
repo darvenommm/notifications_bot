@@ -1,9 +1,8 @@
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums.parse_mode import ParseMode
-
-from bot.src.settings.envs.main import main_settings
 from bot.src.handlers.commands import commands_router
+from bot.src.settings.envs.main import main_settings
 
 
 class BotSettings:

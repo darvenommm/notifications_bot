@@ -1,5 +1,6 @@
 from ipaddress import IPv4Address
-from pydantic import Field, IPvAnyAddress, HttpUrl
+
+from pydantic import Field, HttpUrl, IPvAnyAddress
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 

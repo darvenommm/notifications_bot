@@ -1,4 +1,4 @@
-from .core.bot import BaseBot
+from .core.bots import BaseBot
 
 
 class App:
