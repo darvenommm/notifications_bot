@@ -2,6 +2,8 @@
 # Created by https://www.toptal.com/developers/gitignore/api/visualstudiocode,linux,dotenv,macos,pycharm,pycharm+all,pycharm+iml,python,pythonvanilla,sublimetext,windows
 # Edit at https://www.toptal.com/developers/gitignore?templates=visualstudiocode,linux,dotenv,macos,pycharm,pycharm+all,pycharm+iml,python,pythonvanilla,sublimetext,windows
 
+/rabbitmq_data
+
 ### dotenv ###
 .env
 

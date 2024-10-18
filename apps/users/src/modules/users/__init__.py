@@ -1,2 +1,2 @@
 from .controller import users_controller
-from .queue import users_updater
+from .rpc import users_updater_rpc_client

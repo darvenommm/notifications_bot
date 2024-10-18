@@ -35,11 +35,11 @@ class UsersRepository:
             await session.execute(delete(User).where(User.user_id == user_id))
             await session.commit()
 
-    async def update(self, user_id: int, user_data: UpdateUserDTO) -> None:
+    async def update(self, user_data: UpdateUserDTO) -> None:
         async with db_connector.get_connection() as session:
             update_statement = (
                 update(User)
-                .where(User.user_id == user_id)
+                .where(User.user_id == user_data.user_id)
                 .values(full_name=user_data.full_name, username=user_data.username)
             )
 

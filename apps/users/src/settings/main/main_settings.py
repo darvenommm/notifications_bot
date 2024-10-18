@@ -1,7 +1,7 @@
 from ipaddress import IPv4Address
 
 from pydantic import Field, IPvAnyAddress
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class MainSettings(BaseSettings):
@@ -36,6 +36,8 @@ class MainSettings(BaseSettings):
     @property
     def queue_connection_string(self) -> str:
         return f"amqp://{self.queue_username}:{self.queue_password}@{self.queue_host}:{self.queue_port}"
+
+    model_config = SettingsConfigDict(env_file="./envs/.main.env", env_file_encoding="utf-8")
 
 
 main_settings = MainSettings()

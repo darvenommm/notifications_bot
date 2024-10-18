@@ -1,0 +1,11 @@
+services:
+  rabbitmq:
+    image: rabbitmq:management
+    environment:
+      RABBITMQ_DEFAULT_USER: ${QUEUE_USERNAME}
+      RABBITMQ_DEFAULT_PASS: ${QUEUE_PASSWORD}
+    ports:
+      - ${QUEUE_PORT}:5672
+      - ${QUEUE_ADMIN_PORT}:15672
+    volumes:
+      - ./rabbitmq_data:/var/lib/rabbitmq

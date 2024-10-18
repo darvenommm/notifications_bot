@@ -13,7 +13,7 @@ loop_police = uvloop.EventLoopPolicy()
 asyncio.set_event_loop_policy(loop_police)
 
 
-from .app import App
+from users.src.app import App
 
 
 App().start()
