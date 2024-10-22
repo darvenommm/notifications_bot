@@ -16,28 +16,16 @@ class MainSettings(BaseSettings):
     db_name: str = Field(alias="DB_NAME")
     db_schema: str = Field(alias="DB_SCHEMA")
 
-    queue_host: IPvAnyAddress = Field(alias="QUEUE_HOST")
-    queue_port: int = Field(alias="QUEUE_PORT", ge=0, le=65535)
-    queue_username: str = Field(alias="QUEUE_USERNAME")
-    queue_password: str = Field(alias="QUEUE_PASSWORD")
-
     @property
     def db_connection_string(self) -> str:
         """Use asyncpg engine."""
 
-        return f"postgresql+asyncpg://{self.db_username}:{self.db_password}@{self.db_host}:{self.db_port}"
+        return f"postgresql+asyncpg://{self.db_username}:{self.db_password}@{self.db_host}:{self.db_port}/{self.db_name}"
 
     @property
     def db_connection_sync_string(self) -> str:
         """Use psycopg engine."""
 
-        return f"postgresql+psycopg://{self.db_username}:{self.db_password}@{self.db_host}:{self.db_port}"
-
-    @property
-    def queue_connection_string(self) -> str:
-        return f"amqp://{self.queue_username}:{self.queue_password}@{self.queue_host}:{self.queue_port}"
+        return f"postgresql+psycopg://{self.db_username}:{self.db_password}@{self.db_host}:{self.db_port}/{self.db_name}"
 
     model_config = SettingsConfigDict(env_file="./envs/.main.env", env_file_encoding="utf-8")
-
-
-main_settings = MainSettings()

@@ -1,15 +1,13 @@
-from .core.bots import BaseBot
+import asyncio
+
+from .core.bot_runners import BaseBotRunner
 
 
 class App:
-    __bot: BaseBot
+    __bot_runner: BaseBotRunner
 
-    def __init__(self, bot: BaseBot) -> None:
-        self.__bot = bot
-
-    @property
-    def bot(self) -> BaseBot:
-        return self.__bot
+    def __init__(self, bot_runner: BaseBotRunner) -> None:
+        self.__bot_runner = bot_runner
 
     def start(self) -> None:
-        self.bot.start()
+        self.__bot_runner.start()

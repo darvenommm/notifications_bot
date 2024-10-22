@@ -1,27 +1,38 @@
-import asyncio
 import uvicorn
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
-from typing import Callable, AsyncContextManager, AsyncGenerator
+from typing import AsyncContextManager, AsyncGenerator, Callable, Iterable
 
-from .settings.main import main_settings
-from .core.queue import queue_connector
-from .modules.users import users_controller, users_updater_rpc_client
+from libs.base_classes.controller import Controller
+from .settings.main import MainSettings
+from .modules.users import UsersUpdaterRPCClient
 
 
 class App:
     __server: FastAPI
 
-    def __init__(self) -> None:
+    __main_settings: MainSettings
+    __users_updater: UsersUpdaterRPCClient
+    __controllers: Iterable[Controller]
+
+    def __init__(
+        self,
+        main_settings: MainSettings,
+        users_updater: UsersUpdaterRPCClient,
+        controllers: Iterable[Controller],
+    ) -> None:
+        self.__main_settings = main_settings
+        self.__users_updater = users_updater
+        self.__controllers = controllers
         self.__server = self.__get_set_server()
 
     def start(self) -> None:
         uvicorn.run(
             self.__server,
-            host=str(main_settings.server_host),
-            port=main_settings.server_port,
-            workers=main_settings.workers_count,
+            host=str(self.__main_settings.server_host),
+            port=self.__main_settings.server_port,
+            workers=self.__main_settings.workers_count,
         )
 
     def __get_set_server(self) -> FastAPI:
@@ -30,21 +41,18 @@ class App:
             docs_url="/swagger",
             lifespan=self.__get_lifespan(),
         )
-        server.include_router(users_controller.router)
+
+        for controller in self.__controllers:
+            server.include_router(controller.router)
 
         return server
 
     def __get_lifespan(self) -> Callable[[FastAPI], AsyncContextManager[None]]:
         @asynccontextmanager
         async def lifespan(_: FastAPI) -> AsyncGenerator[None, None]:
-            await queue_connector.init_pool()
-            users_update_task = await users_updater_rpc_client.start()
+            users_updater_task = await self.__users_updater.start()
             yield
-
-            try:
-                users_update_task.cancel()
-                await users_update_task
-            except asyncio.CancelledError:
-                print("Canceled")
+            self.__users_updater.stop()
+            await users_updater_task
 
         return lifespan

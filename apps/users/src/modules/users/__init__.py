@@ -1,2 +1,3 @@
-from .controller import users_controller
-from .rpc import users_updater_rpc_client
+from .controller import UsersController
+from .rpc import UsersUpdaterRPCClient
+from .repository import UsersRepository

@@ -1,22 +1,47 @@
 from dependency_injector import containers, providers
 
+from libs.message_brokers.rabbit import RabbitConnector
+from libs.settings import RabbitSettings
 from .app import App
-from .core.bots import BaseBot, BotSettings
+from .core.bot import Bot
+from .core.bot_runners import BaseBotRunner, PollingBotRunner, WebhooksBotRunner
+from .settings import BotType, BotSettings, WebhooksSettings, ServicesSettings
 from .handlers.controllers.webhooks import WebhooksControllers
-from .settings.envs.main import BotType, main_settings
+from .handlers.commands.start import StartHandler
+from .handlers.commands import CommandsRouter
+from .rpc import UsersUpdaterRPCServer
 
 
 class Container(containers.DeclarativeContainer):
     config = providers.Configuration()
-
     bot_settings = providers.Singleton(BotSettings)
-    bot = providers.AbstractSingleton(BaseBot)
+    webhooks_settings = providers.Singleton(WebhooksSettings)
+    services_settings = providers.Singleton(ServicesSettings)
+    rabbit_settings = providers.Singleton(RabbitSettings)
 
-    webhooks_controller = providers.Singleton(WebhooksControllers, bot_settings=bot_settings)
+    rabbit_connector = providers.Singleton(
+        RabbitConnector,
+        connection_string=config.rabbit_connection_string,
+    )
 
-    webhooks_bot_controllers = providers.List(webhooks_controller)
+    commands_router = providers.Singleton(CommandsRouter)
 
-    app = providers.Singleton(App, bot=bot)
+    bot = providers.Singleton(
+        Bot,
+        bot_settings=bot_settings,
+        routes=providers.List(commands_router),
+    )
+    bot_runner = providers.AbstractSingleton(BaseBotRunner)
+
+    webhooks_controller = providers.Singleton(
+        WebhooksControllers,
+        bot=bot,
+        webhooks_settings=webhooks_settings,
+    )
+
+    users_updater = providers.Factory(UsersUpdaterRPCServer, bot=bot, connector=rabbit_connector)
+
+    app = providers.Singleton(App, bot_runner=bot_runner)
 
 
 class ContainerFactory:
@@ -30,9 +55,12 @@ class ContainerFactory:
 
     @classmethod
     def create(cls) -> Container:
-        current_factory = cls()
+        container = cls().__container
+        container.config.rabbit_connection_string.from_value(
+            container.rabbit_settings().rabbit_connection_string
+        )
 
-        return current_factory.__container
+        return container
 
     def __setup(self) -> None:
         if not self.__is_set:
@@ -40,27 +68,25 @@ class ContainerFactory:
             self.__setup_bot()
 
     def __setup_bot(self) -> None:
-        match main_settings.bot_type:
-            case BotType.POLLING:
-                from .core.bots.polling import PollingBot
+        bot_type = self.__container.bot_settings().type
 
-                self.__container.bot.override(
+        match bot_type:
+            case BotType.POLLING:
+                self.__container.bot_runner.override(
                     providers.Singleton(
-                        PollingBot,
-                        bot_settings=self.__container.bot_settings,
+                        PollingBotRunner,
+                        bot=self.__container.bot,
+                        users_updater=self.__container.users_updater,
                     )
                 )
 
             case BotType.WEBHOOKS:
-                from .core.bots.webhooks import WebhooksBot
-
-                self.__container.bot.override(
+                self.__container.bot_runner.override(
                     providers.Singleton(
-                        WebhooksBot,
-                        bot_settings=self.__container.bot_settings,
-                        controllers=self.__container.webhooks_bot_controllers,
+                        WebhooksBotRunner,
+                        bot=self.__container.bot,
+                        users_updater=self.__container.users_updater,
+                        webhooks_settings=self.__container.webhooks_settings,
+                        controllers=providers.List(self.__container.webhooks_controller),
                     )
                 )
-
-
-container = ContainerFactory.create()

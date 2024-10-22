@@ -1,2 +1,1 @@
-from . import start
-from .router import commands_router
+from .router import CommandsRouter

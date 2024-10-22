@@ -19,7 +19,8 @@ asyncpg = "^0.29.0"
 msgpack = "^1.1.0"
 aio-pika = "^9.4.3"
 dependency-injector = "^4.42.0"
-
+aiogram = "^3.13.1"
+fastapi-controllers = "^0.3.0"
 
 [build-system]
 requires = ["poetry-core"]

@@ -1,3 +1,10 @@
+from sys import path
+from pathlib import Path
+
+current_dir = Path(__file__).resolve().parent
+path.append(str(current_dir.parent.parent))
+path.append(str(current_dir.parent.parent.parent))
+
 from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config
@@ -5,8 +12,12 @@ from sqlalchemy import pool, Connection, text
 
 from alembic import context
 
+from src.container import Container  # type: ignore[import-not-found]
 from src.models import Base  # type: ignore[import-not-found]
-from src.settings.main import main_settings  # type: ignore[import-not-found]
+
+main_settings = Container().main_settings()
+
+print(main_settings.db_connection_sync_string)
 
 
 # this is the Alembic Config object, which provides
