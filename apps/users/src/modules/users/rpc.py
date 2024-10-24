@@ -59,6 +59,7 @@ class UsersUpdaterRPCClient:
         session = self.__get_channel()
 
         for user in users:
+            print(f"processing user: {user.user_id=}")
             payload: bytes = packb(UpdateRequest(user_id=user.user_id).model_dump())
             message = Message(
                 payload,
