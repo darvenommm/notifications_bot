@@ -4,7 +4,7 @@ from aiogram.types import Message
 from http import HTTPStatus
 
 from libs.contracts.users import AddUserDTO
-from bot.src.settings import ServicesSettings
+from libs.settings import ServicesSettings
 
 
 class StartHandler(MessageHandler):

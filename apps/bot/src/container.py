@@ -1,15 +1,14 @@
 from dependency_injector import containers, providers
 
 from libs.message_brokers.rabbit import RabbitConnector
-from libs.settings import RabbitSettings
+from libs.settings import RabbitSettings, ServicesSettings
 from .app import App
 from .core.bot import Bot
 from .core.bot_runners import BaseBotRunner, PollingBotRunner, WebhooksBotRunner
-from .settings import BotType, BotSettings, WebhooksSettings, ServicesSettings
+from .settings import BotType, BotSettings, WebhooksSettings
 from .handlers.controllers.webhooks import WebhooksControllers
-from .handlers.commands.start import StartHandler
 from .handlers.commands import CommandsRouter
-from .rpc import UsersUpdaterRPCServer
+from .broker import UsersUpdaterRPCServer, NotificationsConsumer
 
 
 class Container(containers.DeclarativeContainer):
@@ -40,6 +39,11 @@ class Container(containers.DeclarativeContainer):
     )
 
     users_updater = providers.Factory(UsersUpdaterRPCServer, bot=bot, connector=rabbit_connector)
+    notifications_consumer = providers.Factory(
+        NotificationsConsumer,
+        bot=bot,
+        connector=rabbit_connector,
+    )
 
     app = providers.Singleton(App, bot_runner=bot_runner)
 
@@ -77,6 +81,7 @@ class ContainerFactory:
                         PollingBotRunner,
                         bot=self.__container.bot,
                         users_updater=self.__container.users_updater,
+                        notifications_consumer=self.__container.notifications_consumer,
                     )
                 )
 
@@ -86,6 +91,7 @@ class ContainerFactory:
                         WebhooksBotRunner,
                         bot=self.__container.bot,
                         users_updater=self.__container.users_updater,
+                        notifications_consumer=self.__container.notifications_consumer,
                         webhooks_settings=self.__container.webhooks_settings,
                         controllers=providers.List(self.__container.webhooks_controller),
                     )

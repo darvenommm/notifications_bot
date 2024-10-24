@@ -6,7 +6,7 @@ from msgpack.fallback import unpackb  # type: ignore[import-untyped]
 from typing import Any, cast
 
 from libs.message_brokers.rabbit import RabbitConnector
-from libs.contracts.users import UpdateRequest, UpdateResponse
+from libs.contracts.users import UpdateRequest, UpdateResponse, USERS_QUEUE
 from bot.src.core.bot import Bot
 
 
@@ -26,8 +26,9 @@ class UsersUpdaterRPCServer:
         self.__stop_event.set()
 
     async def start(self) -> None:
+        print("start UsersUpdaterRPCServer")
         async with self.__connector.get_channel() as channel:
-            users_queue = await channel.declare_queue("", durable=True)
+            users_queue = await channel.declare_queue(USERS_QUEUE, durable=True)
 
             while not self.__stop_event.is_set():
                 try:
@@ -40,12 +41,15 @@ class UsersUpdaterRPCServer:
                 except TimeoutError:
                     pass
 
+        print("UsersUpdaterRPCServer really closed")
+
     async def __handle_message(
         self,
         message: AbstractIncomingMessage,
         channel: AbstractChannel,
     ) -> None:
         async with message.process():
+            print("get_message in UsersUpdaterRPCServer", unpackb(message.body))
             reply_to, correlation_id = (message.reply_to, message.correlation_id)
 
             if (reply_to is None) or (correlation_id is None):

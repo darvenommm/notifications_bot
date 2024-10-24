@@ -8,12 +8,13 @@ from fastapi.responses import ORJSONResponse
 from libs.base_classes.controller import Controller
 from ..base_bot_runner import BaseBotRunner
 from bot.src.core.bot import Bot
-from bot.src.rpc import UsersUpdaterRPCServer
+from bot.src.broker import UsersUpdaterRPCServer, NotificationsConsumer
 from bot.src.settings import WebhooksSettings
 
 
 class WebhooksBotRunner(BaseBotRunner):
     __users_updater: UsersUpdaterRPCServer
+    __notifications_consumer: NotificationsConsumer
     __webhooks_settings: WebhooksSettings
     __controllers: Iterable[Controller]
 
@@ -21,11 +22,13 @@ class WebhooksBotRunner(BaseBotRunner):
         self,
         bot: Bot,
         users_updater: UsersUpdaterRPCServer,
+        notifications_consumer: NotificationsConsumer,
         webhooks_settings: WebhooksSettings,
         controllers: Iterable[Controller],
     ):
         super().__init__(bot)
         self.__users_updater = users_updater
+        self.__notifications_consumer = notifications_consumer
         self.__webhooks_settings = webhooks_settings
         self.__controllers = controllers
 
@@ -60,15 +63,20 @@ class WebhooksBotRunner(BaseBotRunner):
                 self.__webhooks_settings.url,
                 secret_token=self.__webhooks_settings.secret,
             )
-            users_updating_task = asyncio.create_task(self.__users_updater.start())
+
+            users_updater_task = asyncio.create_task(self.__users_updater.start())
+            notifications_consumer_task = asyncio.create_task(self.__notifications_consumer.start())
 
             yield
 
-            try:
-                users_updating_task.cancel()
-                await users_updating_task
-            except asyncio.CancelledError:
-                print("Stop webhooks bot")
+            self.__users_updater.stop()
+            self.__notifications_consumer.stop()
+
+            await asyncio.gather(
+                users_updater_task,
+                notifications_consumer_task,
+                return_exceptions=True,
+            )
 
             await bot.delete_webhook()
             await bot.session.close()

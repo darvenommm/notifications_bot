@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-from libs.contracts.users.dto import UpdateUserDTO
+from libs.contracts.users.dtos import UpdateUserDTO
 
 
 class UpdateRequest(BaseModel):
