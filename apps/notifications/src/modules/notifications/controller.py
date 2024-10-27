@@ -1,5 +1,6 @@
 from aiohttp import ClientSession
 from http import HTTPMethod, HTTPStatus
+from fastapi.encoders import jsonable_encoder
 from typing import Any
 
 from libs.base_classes.controller import Controller
@@ -33,11 +34,11 @@ class NotificationsController(Controller):
 
     async def add(self, notification_data: AddNotificationDTO) -> None:
         if notification_data.reply_to != "all":
-            request_data = SendRequest(
+            send_data = SendRequest(
                 reply_to=notification_data.reply_to,
                 message=notification_data.message,
             )
-            await self.__notification_publisher.send(request_data)
+            await self.__notification_publisher.send(send_data, notification_data.datetime)
         else:
             path = f"{self.__services_settings.users_url}users"
 
@@ -47,8 +48,5 @@ class NotificationsController(Controller):
                     users = GetAllUsersDTO(users=response_data["users"]).users
 
             for user in users:
-                request_data = SendRequest(
-                    reply_to=user.user_id,
-                    message=notification_data.message,
-                )
-                await self.__notification_publisher.send(request_data)
+                send_data = SendRequest(reply_to=user.user_id, message=notification_data.message)
+                await self.__notification_publisher.send(send_data, notification_data.datetime)

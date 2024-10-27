@@ -1,6 +1,7 @@
 from aiohttp import ClientSession
 from http import HTTPMethod
 from fastapi import Response, Depends
+from fastapi.encoders import jsonable_encoder
 
 from libs.base_classes.controller import Controller
 from libs.contracts.notifications import AddNotificationDTO
@@ -30,5 +31,5 @@ class NotificationsController(Controller):
         path = f"{self.__services_settings.notifications_url}notifications"
 
         async with ClientSession() as session:
-            async with session.post(path, json=notification_data.model_dump()) as response:
+            async with session.post(path, json=jsonable_encoder(notification_data)) as response:
                 return Response(status_code=response.status)
