@@ -10,5 +10,5 @@ class DBConnector:
         engine = create_async_engine(main_settings.db_connection_string, echo=True)
         self.__session_maker = async_sessionmaker(bind=engine)
 
-    def get_connection(self) -> AsyncSession:
+    def get_session(self) -> AsyncSession:
         return self.__session_maker()
