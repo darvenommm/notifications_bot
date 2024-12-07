@@ -1,10 +1,3 @@
-import fastapi
-
-
-if fastapi is None:
-    raise RuntimeError("Not found fastapi package")
-
-
 from fastapi import APIRouter
 
 

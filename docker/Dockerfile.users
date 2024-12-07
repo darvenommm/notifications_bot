@@ -1,0 +1,20 @@
+FROM python:3.12-slim
+
+WORKDIR /app
+
+RUN pip install --no-cache-dir poetry
+COPY ./apps/users/pyproject.toml ./apps/proxy/poetry.lock* /app/
+RUN poetry config virtualenvs.create false && poetry lock --no-update && poetry install --no-interaction --no-ansi
+
+RUN poetry add alembic
+
+COPY ./apps/users/users /app/users
+COPY ./libs /app/libs
+
+COPY ./apps/users/alembic.ini /app
+COPY ./apps/users/db /app/db
+
+ARG USERS_PORT
+EXPOSE ${USERS_PORT}
+
+CMD bash -c "poetry run alembic upgrade head && python users/main.py"

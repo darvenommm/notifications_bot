@@ -3,6 +3,8 @@
 # Edit at https://www.toptal.com/developers/gitignore?templates=visualstudiocode,linux,dotenv,macos,pycharm,pycharm+all,pycharm+iml,python,pythonvanilla,sublimetext,windows
 
 /rabbitmq_data
+/filebeat_ingest_data
+/logstash_ingest_data
 
 ### dotenv ###
 .env

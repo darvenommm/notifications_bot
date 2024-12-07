@@ -1,32 +1,29 @@
-import aio_pika
-
-if aio_pika is None:
-    raise RuntimeError("Not found aio_pika package!")
-
 from aio_pika import connect_robust
 from aio_pika.pool import Pool, PoolItemContextManager
 from aio_pika.abc import AbstractRobustConnection, AbstractChannel
-from typing import TypeAlias, Self
+from typing import TypeAlias
+
+from libs.settings.rabbit import RabbitSettings
 
 
 class RabbitConnector:
     __DEFAULT_MAX_CONNECTIONS = 2
     __DEFAULT_MAX_CHANNELS = 10
 
-    __connection_string: str
     __max_connections: int
     __max_channels: int
 
+    __rabbit_settings: RabbitSettings
     __channels_pool: Pool[AbstractChannel] | None = None
 
     def __init__(
         self,
-        connection_string: str,
+        rabbit_settings: RabbitSettings,
         *,
         max_connections: int = __DEFAULT_MAX_CONNECTIONS,
         max_channels: int = __DEFAULT_MAX_CHANNELS,
     ) -> None:
-        self.__connection_string = connection_string
+        self.__rabbit_settings = rabbit_settings
         self.max_connections = max_connections
         self.max_channels = max_channels
         self.__set_up()
@@ -39,7 +36,7 @@ class RabbitConnector:
 
     def __set_up(self) -> None:
         async def get_connection() -> AbstractRobustConnection:
-            return await connect_robust(self.__connection_string)
+            return await connect_robust(self.__rabbit_settings.rabbit_connection_string)
 
         ConnectionsPoolType: TypeAlias = Pool[AbstractRobustConnection]
         connection_pool: ConnectionsPoolType = Pool(get_connection, max_size=self.max_connections)

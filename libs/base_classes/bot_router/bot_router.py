@@ -1,8 +1,3 @@
-import aiogram
-
-if aiogram is None:
-    pass
-
 from abc import ABC
 from aiogram import Router
 

@@ -23,6 +23,7 @@ uvloop = "^0.21.0"
 orjson = "^3.10.7"
 dependency-injector = "^4.42.0"
 apscheduler = "^3.10.4"
+colored-custom-logger = "^1.6.0"
 
 
 [build-system]

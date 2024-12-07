@@ -20,6 +20,10 @@ msgpack = "^1.1.0"
 aio-pika = "^9.4.3"
 dependency-injector = "^4.42.0"
 aiogram = "^3.13.1"
+ecs-logging = "^2.2.0"
+starlette-context = "^0.3.6"
+colored-custom-logger = "^1.6.0"
+python-logstash = "^0.4.8"
 
 [build-system]
 requires = ["poetry-core"]

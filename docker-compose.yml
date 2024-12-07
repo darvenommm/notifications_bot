@@ -1,0 +1,167 @@
+networks:
+  shared_network:
+  broker_network:
+  database_network:
+
+x-rabbit-environment:
+  &rabbit-environment
+  RABBIT_HOST: ${RABBIT_HOST}
+  RABBIT_PORT: ${RABBIT_PORT}
+  RABBIT_USERNAME: ${RABBIT_USERNAME}
+  RABBIT_PASSWORD: ${RABBIT_PASSWORD}
+
+x-database-environment:
+  &database-environment
+  DB_HOST: ${DB_HOST}
+  DB_PORT: ${DB_PORT}
+  DB_USERNAME: ${DB_USERNAME}
+  DB_PASSWORD: ${DB_PASSWORD}
+  DB_NAME: ${DB_NAME}
+  DB_SCHEMA: ${DB_SCHEMA}
+
+x-services-environment:
+  &services-environment
+  USERS_URL: http://users:${USERS_PORT:-9001}
+  NOTIFICATIONS_URL: http://notifications:${NOTIFICATIONS_PORT:-9002}
+
+services:
+  rabbit:
+    image: rabbitmq:management
+    container_name: rabbit
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBIT_USERNAME}
+      RABBITMQ_DEFAULT_PASS: ${RABBIT_PASSWORD}
+      RABBITMQ_PLUGINS_DIR: /opt/rabbitmq/plugins:/usr/lib/rabbitmq/plugins
+    ports:
+      - ${RABBIT_ADMIN_PORT}:15672
+    volumes:
+      - ./plugins:/usr/lib/rabbitmq/plugins
+      - ./rabbitmq_data:/var/lib/rabbitmq
+    command: >
+      bash -c "
+        rabbitmq-plugins enable rabbitmq_management &&
+        rabbitmq-plugins enable rabbitmq_delayed_message_exchange &&
+        rabbitmq-server
+      "
+    healthcheck:
+      test: rabbitmq-diagnostics check_port_connectivity
+      interval: 2s
+      timeout: 3s
+      retries: 120
+      start_period: 5s
+    networks:
+      - shared_network
+      - broker_network
+
+  database:
+    container_name: database
+    image: postgres:latest
+    restart: always
+    shm_size: 256mb
+    environment:
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USERNAME}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    healthcheck:
+      test: pg_isready -d ${DB_NAME} -U ${DB_USERNAME} -h database
+      interval: 2s
+      timeout: 3s
+      retries: 120
+    networks:
+      - shared_network
+      - database_network
+
+  bot:
+    container_name: bot
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile.bot
+      args:
+        - BOT_PORT=${BOT_PORT:-9000}
+    environment:
+      BOT_RUNNING_TYPE: ${BOT_RUNNING_TYPE:-polling}
+      BOT_TOKEN: ${BOT_TOKEN}
+      BOT_HOST: ${BOT_HOST:-0.0.0.0}
+      BOT_PORT: ${BOT_PORT:-9000}
+      BOT_OUTER_HOST: ${BOT_OUTER_HOST:-}
+      WEBHOOKS_SECRET: ${WEBHOOKS_SECRET:-}
+      <<: [*rabbit-environment, *services-environment]
+    volumes:
+      - ./apps/bot/bot:/app/bot
+      - ./libs:/app/libs
+    depends_on:
+      rabbit:
+        condition: service_healthy
+    networks:
+      - shared_network
+      - broker_network
+
+  users:
+    container_name: users
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile.users
+      args:
+        - USERS_PORT=${USERS_PORT:-9001}
+    environment:
+      USERS_HOST: ${USERS_HOST:-0.0.0.0}
+      USERS_PORT: ${USERS_PORT:-9001}
+      <<: [*rabbit-environment, *database-environment, *services-environment]
+    volumes:
+      - ./apps/users/users:/app/users
+      - ./apps/users/db:/app/db
+      - ./libs:/app/libs
+    depends_on:
+      rabbit:
+        condition: service_healthy
+      database:
+        condition: service_healthy
+    networks:
+      - shared_network
+      - broker_network
+      - database_network
+
+  notifications:
+    container_name: notifications
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile.notifications
+      args:
+        - NOTIFICATIONS_PORT=${NOTIFICATIONS_PORT:-9002}
+    environment:
+      NOTIFICATIONS_HOST: ${NOTIFICATIONS_HOST:-0.0.0.0}
+      NOTIFICATIONS_PORT: ${NOTIFICATIONS_PORT:-9002}
+      <<: [*rabbit-environment, *services-environment]
+    volumes:
+      - ./apps/notifications/notifications:/app/notifications
+      - ./libs:/app/libs
+    depends_on:
+      rabbit:
+        condition: service_healthy
+    networks:
+      - shared_network
+      - broker_network
+
+  proxy:
+    container_name: proxy
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile.proxy
+      args:
+        - PROXY_PORT=${PROXY_PORT:-9003}
+    environment:
+      PROXY_HOST: ${PROXY_HOST:-0.0.0.0}
+      PROXY_PORT: ${PROXY_PORT:-9003}
+      PROXY_ADMIN_USERNAME: ${PROXY_ADMIN_USERNAME:-admin}
+      PROXY_ADMIN_PASSWORD: ${PROXY_ADMIN_PASSWORD:-changeme}
+      <<: *services-environment
+    volumes:
+      - ./apps/proxy/proxy:/app/proxy
+      - ./libs:/app/libs
+    depends_on:
+      rabbit:
+        condition: service_healthy
+    networks:
+      - shared_network
+    ports:
+      - ${PROXY_PORT:-9003}:${PROXY_PORT:-9003}
