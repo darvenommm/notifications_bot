@@ -25,5 +25,6 @@ class Container(containers.Container):
     app = providers.Singleton(
         App,
         proxy_settings=proxy_settings,
+        services_settings=services_settings,
         controllers=providers.List(auth_controller, notifications_controller),
     )

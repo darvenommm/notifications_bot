@@ -23,6 +23,7 @@ x-services-environment:
   &services-environment
   USERS_URL: http://users:${USERS_PORT:-9001}
   NOTIFICATIONS_URL: http://notifications:${NOTIFICATIONS_PORT:-9002}
+  FRONTEND_URL: http://localhost:${FRONTEND_PORT:-9004}
 
 services:
   rabbit:
@@ -165,3 +166,22 @@ services:
       - shared_network
     ports:
       - ${PROXY_PORT:-9003}:${PROXY_PORT:-9003}
+
+  frontend:
+    container_name: frontend
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile.frontend
+      args:
+        - FRONTEND_PORT=${FRONTEND_PORT:-9004}
+    environment:
+      VITE_PROXY_URL: http://127.0.0.1:${PROXY_PORT:-9003}
+    volumes:
+      - ./apps/frontend:/app
+    ports:
+      - ${FRONTEND_PORT:-9004}:${FRONTEND_PORT:-9004}
+    depends_on:
+      rabbit:
+        condition: service_healthy
+    networks:
+      - shared_network

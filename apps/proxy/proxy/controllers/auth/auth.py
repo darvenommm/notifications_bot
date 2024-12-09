@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta, timezone
 from http import HTTPMethod, HTTPStatus
 from fastapi import Response, HTTPException
 from pydantic import BaseModel
@@ -32,5 +33,20 @@ class AuthController(Controller):
         if not (is_correct_username and is_correct_password):
             raise HTTPException(HTTPStatus.UNAUTHORIZED, "Incorrect username or password")
 
-        response.set_cookie("username", self.__proxy_settings.admin_username)
-        response.set_cookie("password", self.__proxy_settings.admin_password)
+        expires = datetime.now(timezone.utc) + timedelta(weeks=1)
+        response.set_cookie(
+            "username",
+            register_data.username,
+            httponly=True,
+            secure=True,
+            samesite="none",
+            expires=expires,
+        )
+        response.set_cookie(
+            "password",
+            register_data.password,
+            httponly=True,
+            secure=True,
+            samesite="none",
+            expires=expires,
+        )
