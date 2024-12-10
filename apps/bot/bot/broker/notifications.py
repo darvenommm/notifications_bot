@@ -5,6 +5,7 @@ from typing import Any
 from libs.logger import Logger
 from libs.message_brokers.rabbit import RabbitConnector
 from libs.contracts.notifications import SendRequest, NOTIFICATIONS_QUEUE
+from libs.metrics import RECEIVED_BROKER_MESSAGES_TOTAL
 from bot.core.bot import Bot
 
 
@@ -53,6 +54,12 @@ class NotificationsConsumer:
                                 )
 
                                 await self.__bot.bot.send_message(request.reply_to, request.message)
+
+                                RECEIVED_BROKER_MESSAGES_TOTAL.labels(
+                                    consumer="bot",
+                                    provider="notifications",
+                                    title="sended a notification to user",
+                                ).inc()
 
                 except TimeoutError:
                     pass

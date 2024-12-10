@@ -1,0 +1,31 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'bot'
+    static_configs:
+      - targets:
+          - 'bot:${BOT_PORT:-9000}'
+    metrics_path: /metrics
+    scheme: http
+
+  - job_name: 'users'
+    static_configs:
+      - targets:
+          - 'users:${USERS_PORT:-9001}'
+    metrics_path: /metrics
+    scheme: http
+
+  - job_name: 'notifications'
+    static_configs:
+      - targets:
+          - 'notifications:${NOTIFICATIONS_PORT:-9002}'
+    metrics_path: /metrics
+    scheme: http
+
+  - job_name: 'proxy'
+    static_configs:
+      - targets:
+          - 'proxy:${PROXY_PORT:-9003}'
+    metrics_path: /metrics
+    scheme: http

@@ -9,6 +9,7 @@ from libs.contracts.notifications import (
     NOTIFICATIONS_QUEUE,
 )
 from libs.message_brokers.rabbit import RabbitConnector
+from libs.metrics import SENDED_BROKER_MESSAGES_TOTAL
 
 
 class NotificationsPublisher:
@@ -42,3 +43,9 @@ class NotificationsPublisher:
             message = Message(packb(send_data.model_dump()), headers=headers)
 
             await exchange.publish(message, routing_key=NOTIFICATIONS_QUEUE)
+
+            SENDED_BROKER_MESSAGES_TOTAL.labels(
+                provider="notifications",
+                consumer="bot",
+                title="send notifications to user",
+            ).inc()

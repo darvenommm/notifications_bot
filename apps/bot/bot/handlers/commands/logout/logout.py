@@ -6,6 +6,7 @@ from http import HTTPStatus
 from libs.settings.services import ServicesSettings
 from libs.base_classes.bot_router import BotRouter
 from libs.logger import Logger
+from libs.metrics import calculate_execution_time, AIOGRAM_REQUEST_DURATION_SECONDS
 
 
 class LogoutHandlerRouter(BotRouter):
@@ -20,6 +21,9 @@ class LogoutHandlerRouter(BotRouter):
 
         self._router.message(Command("logout"))(self.handle)
 
+    @calculate_execution_time(
+        AIOGRAM_REQUEST_DURATION_SECONDS.labels(server="bot", handler="logout_handler")
+    )
     async def handle(self, message: Message) -> None:
         user = message.from_user
 

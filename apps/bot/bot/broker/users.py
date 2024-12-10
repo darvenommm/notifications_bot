@@ -9,6 +9,7 @@ from uuid import uuid4
 from libs.logger import Logger
 from libs.message_brokers.rabbit import RabbitConnector
 from libs.contracts.users import UpdateRequest, UpdateResponse, USERS_QUEUE
+from libs.metrics import RECEIVED_BROKER_MESSAGES_TOTAL, SENDED_BROKER_MESSAGES_TOTAL
 from bot.core.bot import Bot
 
 
@@ -63,6 +64,12 @@ class UsersUpdaterRPCServer:
             request_data: dict[str, Any] = unpackb(message.body)
             request_payload = UpdateRequest(user_id=cast(int, request_data["user_id"]))
 
+            RECEIVED_BROKER_MESSAGES_TOTAL.labels(
+                consumer="bot",
+                provider="users",
+                title="received user by update its data",
+            ).inc()
+
             user_data = await self.__bot.bot.get_chat(request_payload.user_id, request_timeout=30)
             response = UpdateResponse(
                 user_id=user_data.id,
@@ -78,3 +85,9 @@ class UsersUpdaterRPCServer:
             self.__logger().info(f"Response message in UsersUpdaterRPCServer {response_message}")
 
             await channel.default_exchange.publish(response_message, reply_to)
+
+            SENDED_BROKER_MESSAGES_TOTAL.labels(
+                provider="bot",
+                consumer="users",
+                title="send user's data to update",
+            ).inc()
