@@ -5,6 +5,7 @@ from libs.message_brokers.rabbit import RabbitConnector
 from libs.settings.rabbit import RabbitSettings
 from libs.settings.database import DatabaseSettings
 from libs.logger import Logger
+from libs.metrics import MetricsController
 from .settings.users import UsersSettings
 from .modules.users import UsersController, UsersUpdaterRPCClient, UsersRepository
 from .app import App
@@ -19,6 +20,8 @@ class Container(containers.DeclarativeContainer):
     db_connector = providers.Singleton(DBConnector, database_settings=database_settings)
     logger = providers.Singleton(Logger)
 
+    metrics_controller = providers.Singleton(MetricsController)
+
     users_repository = providers.Singleton(UsersRepository, db_connector=db_connector)
     users_updater = providers.Factory(
         UsersUpdaterRPCClient,
@@ -32,5 +35,5 @@ class Container(containers.DeclarativeContainer):
         App,
         users_settings=users_settings,
         users_updater=users_updater,
-        controllers=providers.List(users_controller),
+        controllers=providers.List(metrics_controller, users_controller),
     )

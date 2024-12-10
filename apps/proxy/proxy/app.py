@@ -6,6 +6,7 @@ from typing import Iterable
 
 from libs.settings.services import ServicesSettings
 from libs.base_classes.controller import Controller
+from libs.metrics import RequestsMetricsMiddleware
 from .settings.proxy import ProxySettings
 
 
@@ -41,6 +42,9 @@ class App:
             allow_methods=["*"],
             allow_headers=["*"],
         )
+
+        RequestsMetricsMiddleware.set_server_name("proxy")
+        server.add_middleware(RequestsMetricsMiddleware)
 
         for controller in self.__controllers:
             server.include_router(controller.router)

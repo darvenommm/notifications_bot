@@ -3,6 +3,7 @@ from dependency_injector import containers, providers
 from libs.message_brokers.rabbit import RabbitConnector
 from libs.settings.rabbit import RabbitSettings
 from libs.settings.services import ServicesSettings
+from libs.metrics import MetricsController
 from .modules.notifications import NotificationsController, NotificationsPublisher
 from .settings.notifications import NotificationsSettings
 from .app import App
@@ -22,9 +23,10 @@ class Container(containers.DeclarativeContainer):
         services_settings=services_settings,
         notification_publisher=notification_publisher,
     )
+    metrics_controller = providers.Singleton(MetricsController)
 
     app = providers.Singleton(
         App,
         notifications_settings=notifications_settings,
-        controllers=providers.List(notification_controller),
+        controllers=providers.List(metrics_controller, notification_controller),
     )

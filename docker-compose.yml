@@ -2,6 +2,13 @@ networks:
   shared_network:
   broker_network:
   database_network:
+  metrics_network:
+
+volumes:
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
 
 x-rabbit-environment:
   &rabbit-environment
@@ -68,9 +75,24 @@ services:
       interval: 2s
       timeout: 3s
       retries: 120
+      start_period: 5s
     networks:
       - shared_network
       - database_network
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - ${PROMETHEUS_PORT:-9090}:9090
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+    restart: unless-stopped
+    networks:
+      - shared_network
+      - metrics_network
 
   bot:
     container_name: bot
@@ -90,12 +112,15 @@ services:
     volumes:
       - ./apps/bot/bot:/app/bot
       - ./libs:/app/libs
+    ports:
+      - ${BOT_PORT:-9000}:${BOT_PORT:-9000}
     depends_on:
       rabbit:
         condition: service_healthy
     networks:
       - shared_network
       - broker_network
+      - metrics_network
 
   users:
     container_name: users
@@ -121,6 +146,7 @@ services:
       - shared_network
       - broker_network
       - database_network
+      - metrics_network
 
   notifications:
     container_name: notifications
@@ -142,6 +168,7 @@ services:
     networks:
       - shared_network
       - broker_network
+      - metrics_network
 
   proxy:
     container_name: proxy
@@ -159,13 +186,14 @@ services:
     volumes:
       - ./apps/proxy/proxy:/app/proxy
       - ./libs:/app/libs
+    ports:
+      - ${PROXY_PORT:-9003}:${PROXY_PORT:-9003}
     depends_on:
       rabbit:
         condition: service_healthy
     networks:
       - shared_network
-    ports:
-      - ${PROXY_PORT:-9003}:${PROXY_PORT:-9003}
+      - metrics_network
 
   frontend:
     container_name: frontend
@@ -185,3 +213,4 @@ services:
         condition: service_healthy
     networks:
       - shared_network
+      - metrics_network

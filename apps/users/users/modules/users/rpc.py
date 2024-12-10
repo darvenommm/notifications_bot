@@ -11,6 +11,7 @@ from typing import Any, cast
 from libs.message_brokers.rabbit import RabbitConnector
 from libs.logger import Logger
 from libs.contracts.users import USERS_EXCHANGE, USERS_QUEUE, UpdateRequest, UpdateResponse
+from libs.metrics import SENDED_BROKER_MESSAGES_TOTAL, RECEIVED_BROKER_MESSAGES_TOTAL
 from .repository import UsersRepository
 
 
@@ -83,10 +84,14 @@ class UsersUpdaterRPCClient:
                 )
                 await users_exchange.publish(message, USERS_QUEUE)
 
+                SENDED_BROKER_MESSAGES_TOTAL.labels(
+                    provider="users", consumer="bot", title="send request for update user data"
+                ).inc()
+
     def __set_scheduler(self) -> None:
         self.__logger().info("set schedular")
         scheduler = self.__get_scheduler()
-        scheduler.add_job(self.__job, "interval", seconds=20)
+        scheduler.add_job(self.__job, "interval", minutes=1)
         scheduler.start()
 
     async def __start_listening_callbacks_queue(self) -> None:
@@ -114,6 +119,12 @@ class UsersUpdaterRPCClient:
                                 username=payload["username"],
                             )
                             await self.__users_repository.update(new_user_data)
+
+                            RECEIVED_BROKER_MESSAGES_TOTAL.labels(
+                                consumer="users",
+                                provider="bot",
+                                title="received user data for updating",
+                            ).inc()
             except TimeoutError:
                 pass
 

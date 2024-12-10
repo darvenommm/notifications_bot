@@ -7,6 +7,7 @@ from libs.settings.services import ServicesSettings
 from libs.base_classes.bot_router import BotRouter
 from libs.logger import Logger
 from libs.contracts.users import AddUserDTO
+from libs.metrics import calculate_execution_time, AIOGRAM_REQUEST_DURATION_SECONDS
 
 
 class StartHandlerRouter(BotRouter):
@@ -21,7 +22,11 @@ class StartHandlerRouter(BotRouter):
 
         self._router.message(CommandStart())(self.handle)
 
+    @calculate_execution_time(
+        AIOGRAM_REQUEST_DURATION_SECONDS.labels(server="bot", handler="start_handler")
+    )
     async def handle(self, message: Message) -> None:
+        self.__logger().info(f"Start handler running")
         user = message.from_user
 
         if user is None:

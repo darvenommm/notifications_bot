@@ -17,6 +17,7 @@ pydantic-settings = "^2.6.0"
 aiohttp = "^3.10.10"
 dependency-injector = "^4.42.0"
 colored-custom-logger = "^1.6.0"
+prometheus-client = "^0.21.1"
 
 
 [build-system]

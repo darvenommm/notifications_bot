@@ -4,6 +4,7 @@ from libs.settings.rabbit import RabbitSettings
 from libs.settings.services import ServicesSettings
 from libs.message_brokers.rabbit import RabbitConnector
 from libs.logger import Logger
+from libs.metrics import MetricsController
 from .app import App
 from .settings.bot import BotRunningType, BotSettings
 from .settings.webhooks import WebhooksSettings
@@ -48,7 +49,8 @@ class Container(containers.DeclarativeContainer):
     )
     bot_runner = providers.AbstractSingleton(BaseBotRunner)
 
-    # Webhooks controllers
+    # Controllers
+    metrics_controller = providers.Singleton(MetricsController)
     webhooks_controller = providers.Singleton(
         WebhooksControllers,
         bot=bot,
@@ -90,6 +92,7 @@ class ContainerFactory:
         common_dependencies = {
             "bot": container.bot,
             "logger": container.logger,
+            "bot_settings": container.bot_settings,
             "users_updater": container.users_updater,
             "notifications_consumer": container.notifications_consumer,
         }
@@ -97,7 +100,11 @@ class ContainerFactory:
         match bot_running_type:
             case BotRunningType.POLLING:
                 container.bot_runner.override(
-                    providers.Singleton(PollingBotRunner, **common_dependencies)
+                    providers.Singleton(
+                        PollingBotRunner,
+                        **common_dependencies,
+                        controllers=providers.List(container.metrics_controller),
+                    )
                 )
 
             case BotRunningType.WEBHOOKS:
@@ -106,7 +113,10 @@ class ContainerFactory:
                         WebhooksBotRunner,
                         **common_dependencies,
                         webhooks_settings=container.webhooks_settings,
-                        controllers=providers.List(container.webhooks_controller),
+                        controllers=providers.List(
+                            container.metrics_controller,
+                            container.webhooks_controller,
+                        ),
                     )
                 )
 

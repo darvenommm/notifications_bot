@@ -5,6 +5,7 @@ from fastapi.responses import ORJSONResponse
 from typing import AsyncContextManager, AsyncGenerator, Callable, Iterable
 
 from libs.base_classes.controller import Controller
+from libs.metrics import RequestsMetricsMiddleware
 from .settings.users import UsersSettings
 from .modules.users import UsersUpdaterRPCClient
 
@@ -40,6 +41,9 @@ class App:
             docs_url="/swagger",
             lifespan=self.__get_lifespan(),
         )
+
+        RequestsMetricsMiddleware.set_server_name("users")
+        server.add_middleware(RequestsMetricsMiddleware)
 
         for controller in self.__controllers:
             server.include_router(controller.router)

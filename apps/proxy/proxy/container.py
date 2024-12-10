@@ -1,6 +1,7 @@
 from dependency_injector import containers, providers
 
 from libs.settings.services import ServicesSettings
+from libs.metrics import MetricsController
 from .settings.proxy import ProxySettings
 from .middlewares import AuthMiddleware
 from .controllers.auth import AuthController
@@ -22,9 +23,11 @@ class Container(containers.Container):
         auth_middleware=auth_middleware,
     )
 
+    metrics_controller = providers.Singleton(MetricsController)
+
     app = providers.Singleton(
         App,
         proxy_settings=proxy_settings,
         services_settings=services_settings,
-        controllers=providers.List(auth_controller, notifications_controller),
+        controllers=providers.List(metrics_controller, auth_controller, notifications_controller),
     )

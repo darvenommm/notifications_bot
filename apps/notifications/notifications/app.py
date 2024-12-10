@@ -4,6 +4,7 @@ from fastapi.responses import ORJSONResponse
 from typing import Iterable
 
 from libs.base_classes.controller import Controller
+from libs.metrics import RequestsMetricsMiddleware
 from .settings.notifications import NotificationsSettings
 
 
@@ -28,6 +29,9 @@ class App:
 
     def __get_set_server(self) -> FastAPI:
         server = FastAPI(default_response_class=ORJSONResponse, docs_url="/swagger")
+
+        RequestsMetricsMiddleware.set_server_name("notifications")
+        server.add_middleware(RequestsMetricsMiddleware)
 
         for controller in self.__controllers:
             server.include_router(controller.router)

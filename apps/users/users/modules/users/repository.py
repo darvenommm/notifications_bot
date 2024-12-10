@@ -4,6 +4,7 @@ from typing import cast, Sequence
 
 from libs.contracts.users import AddUserDTO, UpdateUserDTO
 from libs.databases.postgres import DBConnector
+from libs.metrics import DATABASE_REQUEST_DURATION_SECONDS, calculate_execution_time
 from users.models import User
 
 
@@ -13,16 +14,25 @@ class UsersRepository:
     def __init__(self, db_connector: DBConnector) -> None:
         self.__db_connector = db_connector
 
+    @calculate_execution_time(
+        DATABASE_REQUEST_DURATION_SECONDS.labels(server="users", handler="get_user")
+    )
     async def get_one(self, user_id: int) -> User | None:
         async with self.__db_connector.get_session() as session:
             execution_result = await session.execute(select(User).where(User.user_id == user_id))
 
             return execution_result.scalar_one_or_none()
 
+    @calculate_execution_time(
+        DATABASE_REQUEST_DURATION_SECONDS.labels(server="users", handler="get_users_count")
+    )
     async def get_count(self) -> int:
         async with self.__db_connector.get_session() as session:
             return cast(int, (await session.execute(func.count())).scalar_one())
 
+    @calculate_execution_time(
+        DATABASE_REQUEST_DURATION_SECONDS.labels(server="users", handler="get_users_page")
+    )
     async def get_page(
         self,
         cursor: datetime = datetime.min,
@@ -36,6 +46,9 @@ class UsersRepository:
 
             return execution_result.scalars().all()
 
+    @calculate_execution_time(
+        DATABASE_REQUEST_DURATION_SECONDS.labels(server="users", handler="add_user")
+    )
     async def add(self, user_data: AddUserDTO) -> None:
         async with self.__db_connector.get_session() as session:
             add_statement = insert(User).values(
@@ -47,11 +60,17 @@ class UsersRepository:
             await session.execute(add_statement)
             await session.commit()
 
+    @calculate_execution_time(
+        DATABASE_REQUEST_DURATION_SECONDS.labels(server="users", handler="remove_user")
+    )
     async def remove(self, user_id: int) -> None:
         async with self.__db_connector.get_session() as session:
             await session.execute(delete(User).where(User.user_id == user_id))
             await session.commit()
 
+    @calculate_execution_time(
+        DATABASE_REQUEST_DURATION_SECONDS.labels(server="users", handler="update_user")
+    )
     async def update(self, user_data: UpdateUserDTO) -> None:
         async with self.__db_connector.get_session() as session:
             update_statement = (
