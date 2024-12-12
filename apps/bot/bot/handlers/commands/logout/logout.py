@@ -1,12 +1,13 @@
-from aiohttp import ClientSession
-from aiogram.filters import Command
-from aiogram.types import Message
 from http import HTTPStatus
 
-from libs.settings.services import ServicesSettings
+from aiogram.filters import Command
+from aiogram.types import Message
+from aiohttp import ClientSession
+
 from libs.base_classes.bot_router import BotRouter
 from libs.logger import Logger
-from libs.metrics import calculate_execution_time, AIOGRAM_REQUEST_DURATION_SECONDS
+from libs.metrics import AIOGRAM_REQUEST_DURATION_SECONDS, calculate_execution_time
+from libs.settings.services import ServicesSettings
 
 
 class LogoutHandlerRouter(BotRouter):
@@ -28,7 +29,7 @@ class LogoutHandlerRouter(BotRouter):
         user = message.from_user
 
         if user is None:
-            self.__logger().info(f"Logout handler user is None")
+            self.__logger().info("Logout handler user is None")
             return
 
         self.__logger().info(f"Logout handler run by {user.full_name}")
@@ -40,11 +41,11 @@ class LogoutHandlerRouter(BotRouter):
 
                 match response.status:
                     case HTTPStatus.NO_CONTENT:
-                        self.__logger().info(f"Logout handler: user unsubscribed")
+                        self.__logger().info("Logout handler: user unsubscribed")
                         await message.answer("You're unsubscribed")
                     case HTTPStatus.OK:
-                        self.__logger().info(f"Logout handler: user wasn't subscribed")
+                        self.__logger().info("Logout handler: user wasn't subscribed")
                         await message.answer("You wasn't subscribed")
                     case _:
-                        self.__logger().error(f"Logout handler: Error with user creating")
+                        self.__logger().error("Logout handler: Error with user creating")
                         await message.answer("Some error")

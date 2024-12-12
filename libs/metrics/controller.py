@@ -1,6 +1,7 @@
 from http import HTTPMethod, HTTPStatus
+
 from fastapi import Response
-from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
+from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 
 from libs.base_classes.controller import Controller
 

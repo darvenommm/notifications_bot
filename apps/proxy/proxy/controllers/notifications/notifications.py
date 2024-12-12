@@ -1,12 +1,13 @@
-from aiohttp import ClientSession
 from http import HTTPMethod
-from fastapi import Response, Depends
+
+from aiohttp import ClientSession
+from fastapi import Depends, Response
 from fastapi.encoders import jsonable_encoder
+from proxy.middlewares import AuthMiddleware
 
 from libs.base_classes.controller import Controller
 from libs.contracts.notifications import AddNotificationDTO
 from libs.settings.services import ServicesSettings
-from proxy.middlewares import AuthMiddleware
 
 
 class NotificationsController(Controller):

@@ -1,19 +1,20 @@
 import asyncio
-import uvicorn
 from abc import ABC, abstractmethod
 from contextlib import asynccontextmanager
 from typing import AsyncContextManager, AsyncGenerator, Callable, Iterable
+
+import uvicorn
+from bot.broker import NotificationsConsumer, UsersUpdaterRPCServer
+from bot.core.bot import Bot
+from bot.settings.bot import BotSettings
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 from starlette_context import plugins
 from starlette_context.middleware import RawContextMiddleware
 
-from libs.logger import Logger
 from libs.base_classes.controller import Controller
+from libs.logger import Logger
 from libs.metrics import RequestsMetricsMiddleware
-from bot.settings.bot import BotSettings
-from bot.core.bot import Bot
-from bot.broker import UsersUpdaterRPCServer, NotificationsConsumer
 
 
 class BaseBotRunner(ABC):

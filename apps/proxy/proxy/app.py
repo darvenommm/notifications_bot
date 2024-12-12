@@ -1,12 +1,14 @@
-import uvicorn
-from fastapi import FastAPI
-from fastapi.responses import ORJSONResponse
-from fastapi.middleware.cors import CORSMiddleware
 from typing import Iterable
 
-from libs.settings.services import ServicesSettings
+import uvicorn
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import ORJSONResponse
+
 from libs.base_classes.controller import Controller
 from libs.metrics import RequestsMetricsMiddleware
+from libs.settings.services import ServicesSettings
+
 from .settings.proxy import ProxySettings
 
 

@@ -1,10 +1,11 @@
 from http import HTTPStatus
+from typing import Awaitable, Callable
+
 from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
-from typing import Awaitable, Callable, Type, Self
 
-from .metrics import HTTP_REQUEST_TOTAL, HTTP_REQUEST_SUCCESS_TOTAL
+from .metrics import HTTP_REQUEST_SUCCESS_TOTAL, HTTP_REQUEST_TOTAL
 
 
 class RequestsMetricsMiddleware(BaseHTTPMiddleware):

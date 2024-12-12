@@ -1,6 +1,5 @@
 from prometheus_client import Counter, Histogram
 
-
 HTTP_REQUEST_TOTAL = Counter(
     "http_requests_total", "Total number of HTTP requests", ["server", "method", "path"]
 )

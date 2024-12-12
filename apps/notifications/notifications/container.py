@@ -1,12 +1,13 @@
 from dependency_injector import containers, providers
 
 from libs.message_brokers.rabbit import RabbitConnector
+from libs.metrics import MetricsController
 from libs.settings.rabbit import RabbitSettings
 from libs.settings.services import ServicesSettings
-from libs.metrics import MetricsController
+
+from .app import App
 from .modules.notifications import NotificationsController, NotificationsPublisher
 from .settings.notifications import NotificationsSettings
-from .app import App
 
 
 class Container(containers.DeclarativeContainer):

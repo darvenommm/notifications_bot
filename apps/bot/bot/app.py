@@ -1,4 +1,5 @@
 from libs.logger import Logger
+
 from .core.bot_runners import BaseBotRunner
 
 
@@ -15,5 +16,5 @@ class App:
 
         try:
             self.__bot_runner.start()
-        except Exception as exception:
+        except Exception as exception:  # noqa: PIE786
             self.__logger().error(f"App was stopped by this exception: {exception}")

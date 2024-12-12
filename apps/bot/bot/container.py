@@ -1,20 +1,21 @@
 from dependency_injector import containers, providers
 
+from libs.logger import Logger
+from libs.message_brokers.rabbit import RabbitConnector
+from libs.metrics import MetricsController
 from libs.settings.rabbit import RabbitSettings
 from libs.settings.services import ServicesSettings
-from libs.message_brokers.rabbit import RabbitConnector
-from libs.logger import Logger
-from libs.metrics import MetricsController
+
 from .app import App
-from .settings.bot import BotRunningType, BotSettings
-from .settings.webhooks import WebhooksSettings
+from .broker import NotificationsConsumer, UsersUpdaterRPCServer
 from .core.bot import Bot
 from .core.bot_runners import BaseBotRunner, PollingBotRunner, WebhooksBotRunner
 from .handlers.commands import CommandsRouter
-from .handlers.commands.start import StartHandlerRouter
 from .handlers.commands.logout import LogoutHandlerRouter
+from .handlers.commands.start import StartHandlerRouter
 from .handlers.controllers.webhooks import WebhooksControllers
-from .broker import UsersUpdaterRPCServer, NotificationsConsumer
+from .settings.bot import BotRunningType, BotSettings
+from .settings.webhooks import WebhooksSettings
 
 
 class Container(containers.DeclarativeContainer):

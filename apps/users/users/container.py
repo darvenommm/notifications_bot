@@ -1,14 +1,15 @@
 from dependency_injector import containers, providers
 
 from libs.databases.postgres import DBConnector
-from libs.message_brokers.rabbit import RabbitConnector
-from libs.settings.rabbit import RabbitSettings
-from libs.settings.database import DatabaseSettings
 from libs.logger import Logger
+from libs.message_brokers.rabbit import RabbitConnector
 from libs.metrics import MetricsController
-from .settings.users import UsersSettings
-from .modules.users import UsersController, UsersUpdaterRPCClient, UsersRepository
+from libs.settings.database import DatabaseSettings
+from libs.settings.rabbit import RabbitSettings
+
 from .app import App
+from .modules.users import UsersController, UsersRepository, UsersUpdaterRPCClient
+from .settings.users import UsersSettings
 
 
 class Container(containers.DeclarativeContainer):

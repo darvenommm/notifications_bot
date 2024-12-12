@@ -1,5 +1,6 @@
 import logging
 import sys
+
 from colored_custom_logger import ColoredFormatter  # type: ignore[import-untyped]
 
 

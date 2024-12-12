@@ -1,10 +1,12 @@
-from aiogram import Bot as AiogramBot, Dispatcher
-from aiogram.client.default import DefaultBotProperties
-from aiogram.enums.parse_mode import ParseMode
 from typing import Iterable
 
-from libs.base_classes.bot_router import BotRouter
+from aiogram import Bot as AiogramBot
+from aiogram import Dispatcher
+from aiogram.client.default import DefaultBotProperties
+from aiogram.enums.parse_mode import ParseMode
 from bot.settings.bot import BotSettings
+
+from libs.base_classes.bot_router import BotRouter
 
 
 class Bot:

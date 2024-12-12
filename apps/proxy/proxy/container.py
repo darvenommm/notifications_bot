@@ -1,12 +1,13 @@
 from dependency_injector import containers, providers
 
-from libs.settings.services import ServicesSettings
 from libs.metrics import MetricsController
-from .settings.proxy import ProxySettings
-from .middlewares import AuthMiddleware
+from libs.settings.services import ServicesSettings
+
+from .app import App
 from .controllers.auth import AuthController
 from .controllers.notifications import NotificationsController
-from .app import App
+from .middlewares import AuthMiddleware
+from .settings.proxy import ProxySettings
 
 
 class Container(containers.Container):

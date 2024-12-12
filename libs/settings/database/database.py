@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+
 from pydantic import Field
 from pydantic_settings import BaseSettings
 
@@ -29,8 +30,14 @@ class DatabaseSettings(BaseDatabaseSettings, BaseSettings):
 
     @property
     def db_connection_string(self) -> str:
-        return f"postgresql+asyncpg://{self.username}:{self.password}@{self.host}:{self.port}/{self.database}"
+        username_data = f"{self.username}:{self.password}"
+        host_data = f"{self.host}:{self.port}"
+
+        return f"postgresql+asyncpg://{username_data}@{host_data}/{self.database}"
 
     @property
     def db_connection_sync_string(self) -> str:
-        return f"postgresql+psycopg://{self.username}:{self.password}@{self.host}:{self.port}/{self.database}"
+        username_data = f"{self.username}:{self.password}"
+        host_data = f"{self.host}:{self.port}"
+
+        return f"postgresql+psycopg://{username_data}@{host_data}/{self.database}"

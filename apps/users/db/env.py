@@ -1,5 +1,5 @@
-from sys import path
 from pathlib import Path
+from sys import path
 
 current_dir = Path(__file__).resolve().parent
 path.append(str(current_dir.parent.parent))
@@ -7,13 +7,11 @@ path.append(str(current_dir.parent.parent.parent))
 
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool, Connection, text
-
 from alembic import context
+from sqlalchemy import Connection, engine_from_config, pool, text
+from users.models import Base
 
 from libs.settings.database import DatabaseSettings
-from users.models import Base
 
 database_settings = DatabaseSettings()
 

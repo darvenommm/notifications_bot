@@ -1,10 +1,12 @@
+from typing import Iterable
+
 import uvicorn
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
-from typing import Iterable
 
 from libs.base_classes.controller import Controller
 from libs.metrics import RequestsMetricsMiddleware
+
 from .settings.notifications import NotificationsSettings
 
 

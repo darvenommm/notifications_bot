@@ -1,11 +1,12 @@
-from aiogram.types import Update
-from fastapi import HTTPException, Request
 from http import HTTPMethod, HTTPStatus
 
-from libs.logger import Logger
-from libs.base_classes.controller import Controller
+from aiogram.types import Update
 from bot.core.bot import Bot
 from bot.settings.webhooks import WebhooksSettings
+from fastapi import HTTPException, Request
+
+from libs.base_classes.controller import Controller
+from libs.logger import Logger
 
 
 class WebhooksControllers(Controller):
@@ -32,7 +33,7 @@ class WebhooksControllers(Controller):
         self.__logger().info("Get data from telegram (webhoooks)")
         secret = self.__webhooks_settings.secret
 
-        if not (secret == request.headers.get(self.__SECRET_TOKEN_HEADER)):
+        if secret != request.headers.get(self.__SECRET_TOKEN_HEADER):
             self.__logger().error("Incorrect a webhooks secret token")
             raise HTTPException(HTTPStatus.FORBIDDEN, detail="Incorrect secret token")
 

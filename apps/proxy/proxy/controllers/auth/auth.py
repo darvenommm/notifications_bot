@@ -1,10 +1,11 @@
 from datetime import datetime, timedelta, timezone
 from http import HTTPMethod, HTTPStatus
-from fastapi import Response, HTTPException
+
+from fastapi import HTTPException, Response
+from proxy.settings.proxy import ProxySettings
 from pydantic import BaseModel
 
 from libs.base_classes.controller import Controller
-from proxy.settings.proxy import ProxySettings
 
 
 class RegisterDTO(BaseModel):

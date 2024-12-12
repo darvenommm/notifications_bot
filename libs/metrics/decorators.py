@@ -1,8 +1,8 @@
 import time
 from functools import wraps
 from typing import Any, Awaitable, Callable, TypeVar
-from prometheus_client import Histogram
 
+from prometheus_client import Histogram
 
 T = TypeVar("T")
 

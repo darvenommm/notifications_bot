@@ -1,12 +1,13 @@
 from typing import Iterable
 
-from libs.logger import Logger
-from libs.base_classes.controller import Controller
-from bot.settings.bot import BotSettings
-from bot.settings.webhooks import WebhooksSettings
+from bot.broker import NotificationsConsumer, UsersUpdaterRPCServer
 from bot.core.bot import Bot
 from bot.core.bot_runners import BaseBotRunner
-from bot.broker import UsersUpdaterRPCServer, NotificationsConsumer
+from bot.settings.bot import BotSettings
+from bot.settings.webhooks import WebhooksSettings
+
+from libs.base_classes.controller import Controller
+from libs.logger import Logger
 
 
 class WebhooksBotRunner(BaseBotRunner):

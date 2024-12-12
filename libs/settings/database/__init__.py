@@ -1,1 +1,1 @@
-from .database import DatabaseSettings, BaseDatabaseSettings
+from .database import BaseDatabaseSettings, DatabaseSettings

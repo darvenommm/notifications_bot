@@ -13,4 +13,4 @@ EXPOSE ${FRONTEND_PORT}
 
 ENV FRONTEND_PORT=${FRONTEND_PORT}
 
-CMD bash -c "bun run build && bun run preview -- --port ${FRONTEND_PORT}"
+CMD bash -c "bun dev -- --port ${FRONTEND_PORT}"

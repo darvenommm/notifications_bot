@@ -1,11 +1,12 @@
 from datetime import datetime
-from sqlalchemy import select, insert, update, delete, func
-from typing import cast, Sequence
+from typing import Sequence, cast
+
+from sqlalchemy import delete, func, insert, select, update
+from users.models import User
 
 from libs.contracts.users import AddUserDTO, UpdateUserDTO
 from libs.databases.postgres import DBConnector
 from libs.metrics import DATABASE_REQUEST_DURATION_SECONDS, calculate_execution_time
-from users.models import User
 
 
 class UsersRepository:

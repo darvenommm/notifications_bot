@@ -1,12 +1,14 @@
 import asyncio
 from datetime import datetime
 from http import HTTPMethod, HTTPStatus
-from fastapi import Response, Query
 from math import ceil
 from typing import Annotated
 
+from fastapi import Query, Response
+
 from libs.base_classes.controller import Controller
-from libs.contracts.users import UserSchema, AddUserDTO, GetPaginationDTO
+from libs.contracts.users import AddUserDTO, GetPaginationDTO, UserSchema
+
 from .repository import UsersRepository
 
 

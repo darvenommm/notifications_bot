@@ -1,4 +1,5 @@
 from enum import StrEnum
+
 from pydantic import Field, IPvAnyAddress
 from pydantic_settings import BaseSettings
 

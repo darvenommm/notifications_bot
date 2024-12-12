@@ -1,16 +1,18 @@
 import asyncio
-from aio_pika import Message
-from aio_pika.abc import AbstractChannel, AbstractIncomingMessage
-from msgpack import packb  # type: ignore[import-untyped]
-from msgpack.fallback import unpackb  # type: ignore[import-untyped]
+from contextlib import suppress
 from typing import Any, cast
 from uuid import uuid4
 
+from aio_pika import Message
+from aio_pika.abc import AbstractChannel, AbstractIncomingMessage
+from bot.core.bot import Bot
+from msgpack import packb  # type: ignore[import-untyped]
+from msgpack.fallback import unpackb  # type: ignore[import-untyped]
+
+from libs.contracts.users import USERS_QUEUE, UpdateRequest, UpdateResponse
 from libs.logger import Logger
 from libs.message_brokers.rabbit import RabbitConnector
-from libs.contracts.users import UpdateRequest, UpdateResponse, USERS_QUEUE
 from libs.metrics import RECEIVED_BROKER_MESSAGES_TOTAL, SENDED_BROKER_MESSAGES_TOTAL
-from bot.core.bot import Bot
 
 
 class UsersUpdaterRPCServer:
@@ -36,15 +38,13 @@ class UsersUpdaterRPCServer:
             users_queue = await channel.declare_queue(USERS_QUEUE, durable=True)
 
             while not self.__stop_event.is_set():
-                try:
+                with suppress(TimeoutError):
                     async with users_queue.iterator(timeout=5) as messages_iterator:
                         async for message in messages_iterator:
                             if self.__stop_event.is_set():
                                 break
 
                             await self.__handle_message(message, channel)
-                except TimeoutError:
-                    pass
 
         self.__logger().debug("UsersUpdaterRPCServer really closed")
 

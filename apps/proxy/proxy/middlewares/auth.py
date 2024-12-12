@@ -1,6 +1,6 @@
-from fastapi import Request, HTTPException
 from http import HTTPStatus
 
+from fastapi import HTTPException, Request
 from proxy.settings.proxy import ProxySettings
 
 

@@ -1,13 +1,14 @@
-from aiohttp import ClientSession
-from aiogram.filters import CommandStart
-from aiogram.types import Message
 from http import HTTPStatus
 
-from libs.settings.services import ServicesSettings
+from aiogram.filters import CommandStart
+from aiogram.types import Message
+from aiohttp import ClientSession
+
 from libs.base_classes.bot_router import BotRouter
-from libs.logger import Logger
 from libs.contracts.users import AddUserDTO
-from libs.metrics import calculate_execution_time, AIOGRAM_REQUEST_DURATION_SECONDS
+from libs.logger import Logger
+from libs.metrics import AIOGRAM_REQUEST_DURATION_SECONDS, calculate_execution_time
+from libs.settings.services import ServicesSettings
 
 
 class StartHandlerRouter(BotRouter):
@@ -26,14 +27,14 @@ class StartHandlerRouter(BotRouter):
         AIOGRAM_REQUEST_DURATION_SECONDS.labels(server="bot", handler="start_handler")
     )
     async def handle(self, message: Message) -> None:
-        self.__logger().info(f"Start handler running")
+        self.__logger().info("Start handler running")
         user = message.from_user
 
         if user is None:
-            self.__logger().info(f"Start handler user is None")
+            self.__logger().info("Start handler user is None")
             return
 
-        self.__logger().info(f"Start handler run by {user.full_name}")
+        self.__logger().info("Start handler run by {user.full_name}")
 
         user_data = AddUserDTO(
             user_id=user.id,
@@ -46,11 +47,11 @@ class StartHandlerRouter(BotRouter):
             async with session.post(path, json=user_data.model_dump()) as response:
                 match response.status:
                     case HTTPStatus.CREATED:
-                        self.__logger().info(f"Start handler: user was created")
+                        self.__logger().info("Start handler: user was created")
                         await message.answer("Created")
                     case HTTPStatus.OK | HTTPStatus.NO_CONTENT:
-                        self.__logger().info(f"Start handler: user already has been created")
+                        self.__logger().info("Start handler: user already has been created")
                         await message.answer("You've been created already")
                     case _:
-                        self.__logger().error(f"Start handler: Error with user creating")
+                        self.__logger().error("Start handler: Error with user creating")
                         await message.answer("Some error")

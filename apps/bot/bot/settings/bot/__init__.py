@@ -1,1 +1,1 @@
-from .bot import BotSettings, BotRunningType
+from .bot import BotRunningType, BotSettings

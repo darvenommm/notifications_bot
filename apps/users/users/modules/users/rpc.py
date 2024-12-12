@@ -1,17 +1,20 @@
 import asyncio
+from contextlib import suppress
+from datetime import datetime
+from typing import Any, cast
+from uuid import uuid4
+
 from aio_pika import Message
 from aio_pika.abc import AbstractChannel
-from apscheduler.schedulers.asyncio import AsyncIOScheduler  # type: ignore[import-untyped]
-from datetime import datetime
-from uuid import uuid4
-from msgpack import packb  # type: ignore[import-untyped]
-from msgpack.fallback import unpackb  # type: ignore[import-untyped]
-from typing import Any, cast
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from msgpack import packb
+from msgpack.fallback import unpackb
 
-from libs.message_brokers.rabbit import RabbitConnector
-from libs.logger import Logger
 from libs.contracts.users import USERS_EXCHANGE, USERS_QUEUE, UpdateRequest, UpdateResponse
-from libs.metrics import SENDED_BROKER_MESSAGES_TOTAL, RECEIVED_BROKER_MESSAGES_TOTAL
+from libs.logger import Logger
+from libs.message_brokers.rabbit import RabbitConnector
+from libs.metrics import RECEIVED_BROKER_MESSAGES_TOTAL, SENDED_BROKER_MESSAGES_TOTAL
+
 from .repository import UsersRepository
 
 
@@ -71,7 +74,7 @@ class UsersUpdaterRPCClient:
         cursor: datetime | None = datetime.min
         while cursor is not None:
             users = await self.__users_repository.get_page(cursor=cursor, limit=20)
-            cursor = None if not len(users) else users[-1].created_at
+            cursor = None if len(users) == 0 else users[-1].created_at
 
             for user in users:
                 self.__logger().info(f"processing user: {user.user_id=}")
@@ -100,7 +103,7 @@ class UsersUpdaterRPCClient:
         callbacks_queue = await session.get_queue(self.__get_callbacks_queue())
 
         while not self.__stop_event.is_set():
-            try:
+            with suppress(TimeoutError):
                 async with callbacks_queue.iterator(timeout=5) as messages_iterator:
                     async for message in messages_iterator:
                         async with message.process():
@@ -125,8 +128,6 @@ class UsersUpdaterRPCClient:
                                 provider="bot",
                                 title="received user data for updating",
                             ).inc()
-            except TimeoutError:
-                pass
 
     def __get_scheduler(self) -> AsyncIOScheduler:
         return cast(AsyncIOScheduler, self.__scheduler)

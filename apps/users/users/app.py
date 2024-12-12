@@ -1,13 +1,15 @@
-import uvicorn
 from contextlib import asynccontextmanager
+from typing import AsyncContextManager, AsyncGenerator, Callable, Iterable
+
+import uvicorn
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
-from typing import AsyncContextManager, AsyncGenerator, Callable, Iterable
 
 from libs.base_classes.controller import Controller
 from libs.metrics import RequestsMetricsMiddleware
-from .settings.users import UsersSettings
+
 from .modules.users import UsersUpdaterRPCClient
+from .settings.users import UsersSettings
 
 
 class App:

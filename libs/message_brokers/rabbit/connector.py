@@ -1,7 +1,8 @@
-from aio_pika import connect_robust
-from aio_pika.pool import Pool, PoolItemContextManager
-from aio_pika.abc import AbstractRobustConnection, AbstractChannel
 from typing import TypeAlias
+
+from aio_pika import connect_robust
+from aio_pika.abc import AbstractChannel, AbstractRobustConnection
+from aio_pika.pool import Pool, PoolItemContextManager
 
 from libs.settings.rabbit import RabbitSettings
 

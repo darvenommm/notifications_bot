@@ -6,6 +6,7 @@ path.append(str(current_dir.parent))
 
 
 import asyncio
+
 import uvloop
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())

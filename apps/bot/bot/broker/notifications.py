@@ -1,12 +1,14 @@
 import asyncio
-from msgpack.fallback import unpackb  # type: ignore[import-untyped]
+from contextlib import suppress
 from typing import Any
 
+from bot.core.bot import Bot
+from msgpack.fallback import unpackb  # type: ignore[import-untyped]
+
+from libs.contracts.notifications import NOTIFICATIONS_QUEUE, SendRequest
 from libs.logger import Logger
 from libs.message_brokers.rabbit import RabbitConnector
-from libs.contracts.notifications import SendRequest, NOTIFICATIONS_QUEUE
 from libs.metrics import RECEIVED_BROKER_MESSAGES_TOTAL
-from bot.core.bot import Bot
 
 
 class NotificationsConsumer:
@@ -35,14 +37,10 @@ class NotificationsConsumer:
             queue = await channel.declare_queue(NOTIFICATIONS_QUEUE, durable=True)
 
             while not self.__stop_event.is_set():
-                try:
+                with suppress(TimeoutError):
                     async with queue.iterator(timeout=5) as messages_iterator:
                         async for message in messages_iterator:
                             async with message.process():
-                                self.__logger().info(
-                                    f"Processed messages from NotificationsConsumer {unpackb(message.body)}"
-                                )
-
                                 if self.__stop_event.is_set():
                                     await message.nack()
                                     break
@@ -60,8 +58,5 @@ class NotificationsConsumer:
                                     provider="notifications",
                                     title="sended a notification to user",
                                 ).inc()
-
-                except TimeoutError:
-                    pass
 
             self.__logger().debug("NotificationsConsumer really stopped")

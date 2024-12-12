@@ -1,8 +1,7 @@
-from abc import ABC
 from aiogram import Router
 
 
-class BotRouter(ABC):
+class BotRouter:
     def __init__(self) -> None:
         super().__init__()
         self._router = Router()

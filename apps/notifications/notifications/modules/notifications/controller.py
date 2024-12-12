@@ -1,12 +1,14 @@
-from aiohttp import ClientSession
 from datetime import datetime
 from http import HTTPMethod, HTTPStatus
 from typing import Any
 
+from aiohttp import ClientSession
+
 from libs.base_classes.controller import Controller
-from libs.settings.services import ServicesSettings
 from libs.contracts.notifications import AddNotificationDTO, SendRequest
 from libs.contracts.users import GetPaginationDTO
+from libs.settings.services import ServicesSettings
+
 from .broker import NotificationsPublisher
 
 

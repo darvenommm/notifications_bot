@@ -1,13 +1,10 @@
-from aio_pika import Message, ExchangeType
-from aio_pika.abc import AbstractChannel, HeadersType
 from datetime import datetime
+
+from aio_pika import ExchangeType, Message
+from aio_pika.abc import AbstractChannel, HeadersType
 from msgpack import packb  # type: ignore[import-untyped]
 
-from libs.contracts.notifications import (
-    SendRequest,
-    NOTIFICATIONS_EXCHANGE,
-    NOTIFICATIONS_QUEUE,
-)
+from libs.contracts.notifications import NOTIFICATIONS_EXCHANGE, NOTIFICATIONS_QUEUE, SendRequest
 from libs.message_brokers.rabbit import RabbitConnector
 from libs.metrics import SENDED_BROKER_MESSAGES_TOTAL
 
