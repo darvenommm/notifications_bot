@@ -140,6 +140,8 @@ services:
         condition: service_healthy
       database:
         condition: service_healthy
+    ports:
+      - ${USERS_PORT:-9001}:${USERS_PORT:-9001}
     networks:
       - shared_network
       - broker_network
@@ -160,6 +162,8 @@ services:
     volumes:
       - ./apps/notifications/notifications:/app/notifications
       - ./libs:/app/libs
+    ports:
+      - ${NOTIFICATIONS_PORT:-9002}:${NOTIFICATIONS_PORT:-9002}
     depends_on:
       rabbit:
         condition: service_healthy

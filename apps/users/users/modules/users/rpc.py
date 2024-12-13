@@ -53,7 +53,7 @@ class UsersUpdaterRPCClient:
     def stop(self) -> None:
         self.__logger().info("Stop UsersUpdaterRPCClient")
         self.__stop_event.set()
-        self.__get_scheduler().shutdown()
+        self.__scheduler.shutdown()
         self.__clean()
 
     async def __declare(self) -> None:
@@ -93,9 +93,8 @@ class UsersUpdaterRPCClient:
 
     def __set_scheduler(self) -> None:
         self.__logger().info("set schedular")
-        scheduler = self.__get_scheduler()
-        scheduler.add_job(self.__job, "interval", minutes=1)
-        scheduler.start()
+        self.__scheduler.add_job(self.__job, "interval", minutes=1)
+        self.__scheduler.start()
 
     async def __start_listening_callbacks_queue(self) -> None:
         self.__logger().info("start listening")
@@ -129,8 +128,8 @@ class UsersUpdaterRPCClient:
                                 title="received user data for updating",
                             ).inc()
 
-    def __get_scheduler(self) -> AsyncIOScheduler:
-        return cast(AsyncIOScheduler, self.__scheduler)
+    # def __get_scheduler(self) -> AsyncIOScheduler:
+    #     return cast(AsyncIOScheduler, self.__scheduler)
 
     def __get_channel(self) -> AbstractChannel:
         if self.__channel is None:

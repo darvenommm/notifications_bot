@@ -17,11 +17,14 @@ class Container(containers.DeclarativeContainer):
 
     rabbit_connector = providers.Singleton(RabbitConnector, rabbit_settings=rabbit_settings)
 
-    notification_publisher = providers.Singleton(NotificationsPublisher, connector=rabbit_connector)
+    notification_publisher = providers.Singleton(
+        NotificationsPublisher,
+        connector=rabbit_connector,
+        services_settings=services_settings,
+    )
 
     notification_controller = providers.Singleton(
         NotificationsController,
-        services_settings=services_settings,
         notification_publisher=notification_publisher,
     )
     metrics_controller = providers.Singleton(MetricsController)
