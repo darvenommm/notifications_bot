@@ -37,18 +37,10 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBIT_USERNAME}
       RABBITMQ_DEFAULT_PASS: ${RABBIT_PASSWORD}
-      RABBITMQ_PLUGINS_DIR: /opt/rabbitmq/plugins:/usr/lib/rabbitmq/plugins
     ports:
       - ${RABBIT_ADMIN_PORT}:15672
     volumes:
-      - ./plugins:/usr/lib/rabbitmq/plugins
       - ./rabbitmq_data:/var/lib/rabbitmq
-    command: >
-      bash -c "
-        rabbitmq-plugins enable rabbitmq_management &&
-        rabbitmq-plugins enable rabbitmq_delayed_message_exchange &&
-        rabbitmq-server
-      "
     healthcheck:
       test: rabbitmq-diagnostics check_port_connectivity
       interval: 2s

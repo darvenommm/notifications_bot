@@ -60,6 +60,8 @@ export const HomePage = (): JSX.Element => {
           },
         );
         setState(FormState.SUCCESS);
+        setMessage('');
+        setDatetime(null);
       } catch (error) {
         if (
           error instanceof axios.AxiosError &&
