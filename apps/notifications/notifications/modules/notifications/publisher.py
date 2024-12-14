@@ -9,10 +9,10 @@ from apscheduler.triggers.date import DateTrigger
 from msgpack import packb
 
 from libs.contracts.notifications import (
-    AddNotificationDTO,
-    SendRequest,
     NOTIFICATIONS_EXCHANGE,
     NOTIFICATIONS_QUEUE,
+    AddNotificationDTO,
+    SendRequest,
 )
 from libs.contracts.users import GetPaginationDTO
 from libs.message_brokers.rabbit import RabbitConnector

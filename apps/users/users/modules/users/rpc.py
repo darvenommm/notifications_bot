@@ -1,7 +1,7 @@
 import asyncio
 from contextlib import suppress
 from datetime import datetime
-from typing import Any, cast
+from typing import Any
 from uuid import uuid4
 
 from aio_pika import Message
@@ -127,9 +127,6 @@ class UsersUpdaterRPCClient:
                                 provider="bot",
                                 title="received user data for updating",
                             ).inc()
-
-    # def __get_scheduler(self) -> AsyncIOScheduler:
-    #     return cast(AsyncIOScheduler, self.__scheduler)
 
     def __get_channel(self) -> AbstractChannel:
         if self.__channel is None:
